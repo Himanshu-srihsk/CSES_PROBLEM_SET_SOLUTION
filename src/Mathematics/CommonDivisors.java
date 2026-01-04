@@ -2,66 +2,34 @@ package Mathematics;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-public class CountingDivisors {
-    static int MOD = 1000000007;
-    static List<Integer> allPrimes = new ArrayList<>();
+public class CommonDivisors {
+    static int MAX = 1000006;
     public static void main(String[] args) throws IOException {
-       FastScanner fs = new FastScanner(System.in);
-       int t = fs.nextInt();
-       seive(1000000);
-       StringBuilder ans = new StringBuilder();
-        while (t-->0){
-            long res = 1;
-            long n = fs.nextLong();
-            List<Integer> powers = new ArrayList<>();
-            for(int i: allPrimes){
-                if((long)i*i >n) break;
-                if(n%i==0){
-                    int cnt = 0;
-                    while(n%i==0){
+          FastScanner fs = new FastScanner(System.in);
+          int n = fs.nextInt();
+          int[] arr = new int[n];
 
-                        n/=i;
-                        cnt++;
-                    }
-                    powers.add(cnt);
-                }
-            }
-            if(n!=1){
-                // measn n itslef is prime no ex : n=17
-                powers.add(1);
-            }
-            for(int k:powers){
-                res = res*(k+1);
-            }
-            ans.append(res).append("\n");
-        }
-        System.out.println(ans.toString());
+        int[] dp = new int[MAX+1];
+        Arrays.fill(dp,0);
+
+          for(int i=0;i<n;i++){
+              int x = fs.nextInt();
+              dp[x]++;
+          }
+          int ans = 1;
+          for(int gcd = MAX;gcd>=1;gcd--){
+              int count = 0;
+              for(int pointer = gcd;pointer<=MAX;pointer+=gcd){
+                  count+=dp[pointer];
+              }
+              if(count>1){
+                  System.out.println(gcd);
+                  return;
+              }
+          }
     }
-
-    private static void seive(int n) {
-        boolean[] isPrime = new boolean[n+1];
-        isPrime[0]=false;
-        isPrime[1]=false;
-        Arrays.fill(isPrime,true);
-        for(int i=2;i*i<=n;i++){
-            if(isPrime[i]){
-                for(int j=i*i;j<=n;j+=i){
-                    isPrime[j] = false;
-                }
-            }
-        }
-        for(int i=2;i<=n;i++){
-            if(isPrime[i]){
-                allPrimes.add(i);
-            }
-        }
-
-    }
-
     static class FastScanner {
         private final byte[] buffer = new byte[1 << 16];
         private int ptr = 0, len = 0;

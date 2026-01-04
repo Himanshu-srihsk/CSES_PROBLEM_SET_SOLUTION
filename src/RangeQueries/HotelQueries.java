@@ -1,67 +1,65 @@
-package Mathematics;
+package RangeQueries;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-public class CountingDivisors {
-    static int MOD = 1000000007;
-    static List<Integer> allPrimes = new ArrayList<>();
+public class HotelQueries {
     public static void main(String[] args) throws IOException {
        FastScanner fs = new FastScanner(System.in);
-       int t = fs.nextInt();
-       seive(1000000);
+       int n = fs.nextInt();
+       int m = fs.nextInt();
+       long[] arr = new long[n];
+       for(int i=0;i<n;i++){
+           arr[i] = fs.nextLong();
+       }
+       SegmentTree segmentTree = new SegmentTree(arr);
        StringBuilder ans = new StringBuilder();
-        while (t-->0){
-            long res = 1;
-            long n = fs.nextLong();
-            List<Integer> powers = new ArrayList<>();
-            for(int i: allPrimes){
-                if((long)i*i >n) break;
-                if(n%i==0){
-                    int cnt = 0;
-                    while(n%i==0){
+       while (m-- > 0){
+           int roomReq = fs.nextInt();
+           long hotelUsed = segmentTree.queryTree(1,0,n-1,roomReq);
 
-                        n/=i;
-                        cnt++;
-                    }
-                    powers.add(cnt);
-                }
-            }
-            if(n!=1){
-                // measn n itslef is prime no ex : n=17
-                powers.add(1);
-            }
-            for(int k:powers){
-                res = res*(k+1);
-            }
-            ans.append(res).append("\n");
-        }
-        System.out.println(ans.toString());
+           ans.append(hotelUsed==-1?0:hotelUsed+1).append(" ");
+       }
+       System.out.println(ans.toString());
     }
-
-    private static void seive(int n) {
-        boolean[] isPrime = new boolean[n+1];
-        isPrime[0]=false;
-        isPrime[1]=false;
-        Arrays.fill(isPrime,true);
-        for(int i=2;i*i<=n;i++){
-            if(isPrime[i]){
-                for(int j=i*i;j<=n;j+=i){
-                    isPrime[j] = false;
-                }
-            }
-        }
-        for(int i=2;i<=n;i++){
-            if(isPrime[i]){
-                allPrimes.add(i);
-            }
+    static class SegmentTree{
+        long[] ST;
+        int n;
+        SegmentTree(long[] arr){
+            this.n = arr.length;
+            ST = new long[4*n+1];
+            buildTree(arr,1,0,n-1);
         }
 
+        private void buildTree(long[] arr,int idx,int start,int end) {
+            if(start==end){
+                ST[idx] = arr[start];
+                return;
+            }
+            int mid = (start +(end-start)/2);
+            buildTree(arr,2*idx,start,mid);
+            buildTree(arr,2*idx+1,mid+1,end);
+            ST[idx] = Math.max(ST[2*idx],ST[2*idx+1]);
+        }
+        private long queryTree(int idx,int start,int end,int x){
+            if(ST[idx] < x){
+                return -1; // mat;lab rooot pe max hi smaller hai x required se means we cannot allocate any hotel
+            }
+             if(start==end){
+                 ST[idx]-=x;
+                 return start;
+             }
+            int mid = (start +(end-start)/2);
+             long res;
+            if(ST[2*idx]>= x){
+                 res = queryTree(2*idx,start,mid,x);
+             }else{
+                 res = queryTree(2*idx+1,mid+1,end,x);
+             }
+             ST[idx] = Math.max(ST[2*idx],ST[2*idx+1]);
+             return res;
+        }
     }
-
     static class FastScanner {
         private final byte[] buffer = new byte[1 << 16];
         private int ptr = 0, len = 0;

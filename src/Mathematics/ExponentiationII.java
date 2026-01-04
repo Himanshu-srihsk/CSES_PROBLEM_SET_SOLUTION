@@ -11,6 +11,9 @@ public class ExponentiationII {
         StringBuilder ans = new StringBuilder();
         /*
         Fermat Little Theorem
+        https://www.youtube.com/watch?v=DhZdzYFHFXc
+
+        https://www.youtube.com/watch?v=YPJ38aWeyGI
          */
         while (t-->0){
             long a,b,c;
@@ -21,10 +24,16 @@ public class ExponentiationII {
 //            res = exponentiation(a,res);
 //            ans.append(res).append("\n");
             //TO DO
+
+            long b_pow_c = exponentiation(b,c,MOD-1);
+            long finalAns = exponentiation(a,b_pow_c,MOD);
+            ans.append(finalAns).append("\n");
         }
         System.out.println(ans.toString());
     }
-    private static long exponentiation(long a, long b) {
+
+
+    private static long exponentiation(long a, long b,long MOD) {
         long res = 1;
         long base = a;
         if(a==0 && b==0){

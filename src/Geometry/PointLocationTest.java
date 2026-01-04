@@ -1,67 +1,36 @@
-package Mathematics;
+package Geometry;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-public class CountingDivisors {
-    static int MOD = 1000000007;
-    static List<Integer> allPrimes = new ArrayList<>();
+public class PointLocationTest {
     public static void main(String[] args) throws IOException {
        FastScanner fs = new FastScanner(System.in);
-       int t = fs.nextInt();
-       seive(1000000);
+       int n = fs.nextInt();
        StringBuilder ans = new StringBuilder();
-        while (t-->0){
-            long res = 1;
-            long n = fs.nextLong();
-            List<Integer> powers = new ArrayList<>();
-            for(int i: allPrimes){
-                if((long)i*i >n) break;
-                if(n%i==0){
-                    int cnt = 0;
-                    while(n%i==0){
+       while (n-- >0){
+           long x1 = fs.nextLong();
+           long y1 = fs.nextLong();
+           long x2 = fs.nextLong();
+           long y2 = fs.nextLong();
+           long x3 = fs.nextLong();
+           long y3 = fs.nextLong();
 
-                        n/=i;
-                        cnt++;
-                    }
-                    powers.add(cnt);
-                }
-            }
-            if(n!=1){
-                // measn n itslef is prime no ex : n=17
-                powers.add(1);
-            }
-            for(int k:powers){
-                res = res*(k+1);
-            }
-            ans.append(res).append("\n");
-        }
-        System.out.println(ans.toString());
+            double cross = (y2-y1) * (x3-x1) - (y3-y1) * (x2-x1);
+//           double slope1 = (y2-y1)*1.0/(x2-x1);
+//           double slope2 = (y3-y1)*1.0/(x3-x1);
+
+           if(cross == 0){
+               ans.append("TOUCH").append("\n");
+           } else if (cross > 0) {
+               ans.append("RIGHT").append("\n");
+           }else{
+               ans.append("LEFT").append("\n");
+           }
+
+       }
+       System.out.println(ans.toString());
     }
-
-    private static void seive(int n) {
-        boolean[] isPrime = new boolean[n+1];
-        isPrime[0]=false;
-        isPrime[1]=false;
-        Arrays.fill(isPrime,true);
-        for(int i=2;i*i<=n;i++){
-            if(isPrime[i]){
-                for(int j=i*i;j<=n;j+=i){
-                    isPrime[j] = false;
-                }
-            }
-        }
-        for(int i=2;i<=n;i++){
-            if(isPrime[i]){
-                allPrimes.add(i);
-            }
-        }
-
-    }
-
     static class FastScanner {
         private final byte[] buffer = new byte[1 << 16];
         private int ptr = 0, len = 0;

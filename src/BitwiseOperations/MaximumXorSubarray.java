@@ -1,65 +1,80 @@
-package Mathematics;
+package BitwiseOperations;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-public class CountingDivisors {
-    static int MOD = 1000000007;
-    static List<Integer> allPrimes = new ArrayList<>();
+/*
+Step 1: Prefix XOR
+px[i] = a1 ^ a2 ^ ... ^ ai
+
+Step 2:
+XOR(l..r) = px[r] ^ px[l-1]
+
+So problem becomes:
+
+Find two prefix XORs whose XOR is maximum
+ */
+public class MaximumXorSubarray {
     public static void main(String[] args) throws IOException {
        FastScanner fs = new FastScanner(System.in);
-       int t = fs.nextInt();
-       seive(1000000);
-       StringBuilder ans = new StringBuilder();
-        while (t-->0){
-            long res = 1;
-            long n = fs.nextLong();
-            List<Integer> powers = new ArrayList<>();
-            for(int i: allPrimes){
-                if((long)i*i >n) break;
-                if(n%i==0){
-                    int cnt = 0;
-                    while(n%i==0){
-
-                        n/=i;
-                        cnt++;
-                    }
-                    powers.add(cnt);
-                }
-            }
-            if(n!=1){
-                // measn n itslef is prime no ex : n=17
-                powers.add(1);
-            }
-            for(int k:powers){
-                res = res*(k+1);
-            }
-            ans.append(res).append("\n");
-        }
-        System.out.println(ans.toString());
+       int n = fs.nextInt();
+       int[] arr = new int[n];
+       for(int i=0;i<n;i++){
+           arr[i] = fs.nextInt();
+       }
+        int result = maxSubarrayXOR(arr, n);
+       System.out.println(result);
     }
 
-    private static void seive(int n) {
-        boolean[] isPrime = new boolean[n+1];
-        isPrime[0]=false;
-        isPrime[1]=false;
-        Arrays.fill(isPrime,true);
-        for(int i=2;i*i<=n;i++){
-            if(isPrime[i]){
-                for(int j=i*i;j<=n;j+=i){
-                    isPrime[j] = false;
-                }
-            }
+    private static int maxSubarrayXOR(int[] arr, int n) {
+       Trie root = new Trie();
+      insertIntoTrie(root,0);
+        int px = 0;
+        int ans = 0;
+        for(int i=0;i<n;i++){
+            px^=arr[i];
+            ans = Math.max(ans,findMax(root,px));
+            insertIntoTrie(root,px);
         }
-        for(int i=2;i<=n;i++){
-            if(isPrime[i]){
-                allPrimes.add(i);
-            }
-        }
+        return ans;
+    }
+    public static int findMax(Trie root, int num){
+        int maxi = 0;
+        Trie curr = root;
+        for(int i=31;i>=0;i--){
+            int bit = ((1 << i) & num) != 0 ? 1 : 0;
 
+            if(curr.child[1-bit]==null){
+                curr = curr.child[bit];
+            }else{
+                maxi = (maxi|(1<<i));
+                curr = curr.child[1-bit];
+            }
+        }
+        return maxi;
+    }
+    public static void insertIntoTrie(Trie root,int num){
+        Trie curr = root;
+        for(int i=31;i>=0;i--){
+            int bit = ((1 << i) & num) != 0 ? 1 : 0;
+
+            if(curr.child[bit]==null){
+                curr.child[bit] = new Trie();
+            }
+            curr = curr.child[bit];
+        }
+        curr.num = num;
+    }
+    static class Trie{
+        Trie[] child= new Trie[2];
+        int num;
+        Trie(){
+            for(int i=0;i<2;i++){
+                child[i]= null;
+            }
+
+
+        }
     }
 
     static class FastScanner {

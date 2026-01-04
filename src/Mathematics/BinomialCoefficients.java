@@ -1,65 +1,73 @@
-package Mathematics;
+
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-public class CountingDivisors {
-    static int MOD = 1000000007;
-    static List<Integer> allPrimes = new ArrayList<>();
+public class BinomialCoefficients {
+    static final int MOD = 1_000_000_007;
+    static final int MAX = 1_000_000;
+    static long[] fact = new long[MAX + 1];
+    static long[] invFact = new long[MAX + 1];
     public static void main(String[] args) throws IOException {
-       FastScanner fs = new FastScanner(System.in);
-       int t = fs.nextInt();
-       seive(1000000);
-       StringBuilder ans = new StringBuilder();
-        while (t-->0){
-            long res = 1;
-            long n = fs.nextLong();
-            List<Integer> powers = new ArrayList<>();
-            for(int i: allPrimes){
-                if((long)i*i >n) break;
-                if(n%i==0){
-                    int cnt = 0;
-                    while(n%i==0){
+        FastScanner fs = new FastScanner(System.in);
+        precompute();
 
-                        n/=i;
-                        cnt++;
-                    }
-                    powers.add(cnt);
-                }
+        int q = fs.nextInt();
+        StringBuilder sb = new StringBuilder();
+
+        while (q-- > 0) {
+            int n = fs.nextInt();
+            int k = fs.nextInt();
+            if (k < 0 || k > n) {
+                sb.append(0).append('\n');
+            }else{
+                long ans = fact[n];
+                ans = (ans * invFact[k])%MOD;
+                ans = (ans * invFact[n-k])%MOD;
+                sb.append(ans).append("\n");
             }
-            if(n!=1){
-                // measn n itslef is prime no ex : n=17
-                powers.add(1);
-            }
-            for(int k:powers){
-                res = res*(k+1);
-            }
-            ans.append(res).append("\n");
         }
-        System.out.println(ans.toString());
+        System.out.println(sb.toString());
+
     }
 
-    private static void seive(int n) {
-        boolean[] isPrime = new boolean[n+1];
-        isPrime[0]=false;
-        isPrime[1]=false;
-        Arrays.fill(isPrime,true);
-        for(int i=2;i*i<=n;i++){
-            if(isPrime[i]){
-                for(int j=i*i;j<=n;j+=i){
-                    isPrime[j] = false;
-                }
-            }
-        }
-        for(int i=2;i<=n;i++){
-            if(isPrime[i]){
-                allPrimes.add(i);
-            }
+    private static void precompute() {
+        fact[0]= 1;
+        for(int i=1;i<=MAX;i++){
+            fact[i]= (fact[i-1]*i)%MOD;
         }
 
+        /*
+        n! / (k! * (n-k)!)
+        a / b  ≡  a × inverse(b) (mod M)
+        inverse(b) = b^(M-2) mod M
+
+        (i+1)! = (i+1) × i!
+        inverse(i!) = inverse((i+1)!) × (i+1)
+invFact[i] = invFact[i+1] * (i+1) % MOD;
+
+
+         */
+        invFact[MAX] = exponentiation(fact[MAX], MOD-2);
+        for (int i = MAX - 1; i >= 0; i--) {
+            invFact[i] = invFact[i + 1] * (i + 1) % MOD;
+        }
+
+//        for(int i= MAX;i>=0;i--){
+//            invFact[i] = exponentiation(fact[i], MOD-2);
+//        }
+    }
+    private static long exponentiation(long a, long b) {
+        long res = 1;
+        long base = a;
+        while(b>0){
+            if(b%2!=0){
+                res = (res * base)%MOD;
+            }
+            base = (base * base)%MOD;
+            b>>=1;
+        }
+        return res;
     }
 
     static class FastScanner {
