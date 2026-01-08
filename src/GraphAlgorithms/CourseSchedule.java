@@ -1,73 +1,70 @@
-package Mathematics;
+
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Stack;
 
-public class BinomialCoefficients {
-    static final int MOD = 1_000_000_007;
-    static final int MAX = 1_000_000;
-    static long[] fact = new long[MAX + 1];
-    static long[] invFact = new long[MAX + 1];
+public class CourseSchedule {
+    static List<Integer>[] graph;
+    static int[] indegree;
+    static boolean[] visited;
     public static void main(String[] args) throws IOException {
-        FastScanner fs = new FastScanner(System.in);
-        precompute();
+      FastScanner fs = new FastScanner(System.in);
+      int n = fs.nextInt();
+      int m = fs.nextInt();
+        graph = new ArrayList[n + 1];
+        indegree = new int[n+1];
+        Arrays.fill(indegree,0);
+        for (int i = 1; i <= n; i++) graph[i] = new ArrayList<>();
 
-        int q = fs.nextInt();
-        StringBuilder sb = new StringBuilder();
-
-        while (q-- > 0) {
-            int n = fs.nextInt();
-            int k = fs.nextInt();
-            if (k < 0 || k > n) {
-                sb.append(0).append('\n');
-            }else{
-                long ans = fact[n];
-                ans = (ans * invFact[k])%MOD;
-                ans = (ans * invFact[n-k])%MOD;
-                sb.append(ans).append("\n");
-            }
+        for (int i = 0; i < m; i++) {
+            int u = fs.nextInt();
+            int v = fs.nextInt();
+            graph[u].add(v);
+            indegree[v]++;
         }
-        System.out.println(sb.toString());
-
+        visited = new boolean[n + 1];
+        List<Integer> ans =  doTopologicalSort(n);
+        if(ans==null){
+            System.out.println("IMPOSSIBLE");
+            return;
+        }
+        StringBuilder out = new StringBuilder();
+        for(int x:ans){
+            out.append(x).append(" ");
+        }
+        System.out.println(out.toString());
     }
 
-    private static void precompute() {
-        fact[0]= 1;
-        for(int i=1;i<=MAX;i++){
-            fact[i]= (fact[i-1]*i)%MOD;
-        }
+    private static List<Integer> doTopologicalSort(int n) {
+        List<Integer> L = new ArrayList<>();
+        Stack<Integer> stack = new Stack<>();
 
-        /*
-        n! / (k! * (n-k)!)
-        a / b  ≡  a × inverse(b) (mod M)
-        inverse(b) = b^(M-2) mod M
-
-        (i+1)! = (i+1) × i!
-        inverse(i!) = inverse((i+1)!) × (i+1)
-invFact[i] = invFact[i+1] * (i+1) % MOD;
-
-
-         */
-        invFact[MAX] = exponentiation(fact[MAX], MOD-2);
-        for (int i = MAX - 1; i >= 0; i--) {
-            invFact[i] = invFact[i + 1] * (i + 1) % MOD;
-        }
-
-//        for(int i= MAX;i>=0;i--){
-//            invFact[i] = exponentiation(fact[i], MOD-2);
-//        }
-    }
-    private static long exponentiation(long a, long b) {
-        long res = 1;
-        long base = a;
-        while(b>0){
-            if(b%2!=0){
-                res = (res * base)%MOD;
+        for(int i=1;i<=n;i++){
+            if(indegree[i]==0){
+                stack.push(i);
             }
-            base = (base * base)%MOD;
-            b>>=1;
         }
-        return res;
+        while (!stack.isEmpty()){
+            int i = stack.pop();
+            L.add(i);
+            for(int m: graph[i]){
+                indegree[m]--;
+                if(indegree[m]==0){
+                    stack.push(m);
+                }
+            }
+        }
+        for (int i = 0; i < n; i++)
+        {
+            if (indegree[i] != 0) {
+                return null;
+            }
+        }
+        return L;
     }
 
     static class FastScanner {

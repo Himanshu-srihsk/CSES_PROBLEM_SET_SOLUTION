@@ -1,73 +1,76 @@
-package Mathematics;
+package GraphAlgorithms;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Map;
 
-public class BinomialCoefficients {
-    static final int MOD = 1_000_000_007;
-    static final int MAX = 1_000_000;
-    static long[] fact = new long[MAX + 1];
-    static long[] invFact = new long[MAX + 1];
+public class ShortestRoutesII {
+    static long[][] adjMatrix;
+    static long[][] cost;
+    static long I = Long.MAX_VALUE;
+    static int n;
     public static void main(String[] args) throws IOException {
-        FastScanner fs = new FastScanner(System.in);
-        precompute();
-
+       FastScanner fs = new FastScanner(System.in);
+       /*
+       Floyd Warshall algorithm
+        */
+         n = fs.nextInt();
+        int m = fs.nextInt();
         int q = fs.nextInt();
-        StringBuilder sb = new StringBuilder();
-
-        while (q-- > 0) {
-            int n = fs.nextInt();
-            int k = fs.nextInt();
-            if (k < 0 || k > n) {
-                sb.append(0).append('\n');
+        adjMatrix = new long[n+1][n+1];
+        for(int i=0;i<=n;i++){
+            Arrays.fill(adjMatrix[i],I);
+        }
+        for(int i=0;i<m;i++){
+            int a = fs.nextInt();
+            int b = fs.nextInt();
+            int d = fs.nextInt();
+            adjMatrix[a][b] = Math.min(adjMatrix[a][b],d);
+            adjMatrix[b][a] = Math.min(adjMatrix[b][a],d);
+        }
+        floydWarshall();
+        StringBuilder out = new StringBuilder();
+        while (q-- >0){
+            long ans = cost[fs.nextInt()][fs.nextInt()];
+            if(ans==I){
+                out.append(-1).append("\n");
             }else{
-                long ans = fact[n];
-                ans = (ans * invFact[k])%MOD;
-                ans = (ans * invFact[n-k])%MOD;
-                sb.append(ans).append("\n");
+                out.append(ans).append("\n");
             }
         }
-        System.out.println(sb.toString());
+        System.out.println(out.toString());
 
     }
 
-    private static void precompute() {
-        fact[0]= 1;
-        for(int i=1;i<=MAX;i++){
-            fact[i]= (fact[i-1]*i)%MOD;
+    private static void floydWarshall() {
+        if (adjMatrix ==null || adjMatrix.length == 0) {
+            return;
         }
+        cost = new long[n+1][n+1];
 
-        /*
-        n! / (k! * (n-k)!)
-        a / b  ≡  a × inverse(b) (mod M)
-        inverse(b) = b^(M-2) mod M
-
-        (i+1)! = (i+1) × i!
-        inverse(i!) = inverse((i+1)!) × (i+1)
-invFact[i] = invFact[i+1] * (i+1) % MOD;
-
-
-         */
-        invFact[MAX] = exponentiation(fact[MAX], MOD-2);
-        for (int i = MAX - 1; i >= 0; i--) {
-            invFact[i] = invFact[i + 1] * (i + 1) % MOD;
-        }
-
-//        for(int i= MAX;i>=0;i--){
-//            invFact[i] = exponentiation(fact[i], MOD-2);
-//        }
-    }
-    private static long exponentiation(long a, long b) {
-        long res = 1;
-        long base = a;
-        while(b>0){
-            if(b%2!=0){
-                res = (res * base)%MOD;
+        for(int v=0;v<=n;v++){
+            for(int u=0;u<=n;u++){
+                if(v==u){
+                    cost[v][u] = 0;
+                }else{
+                    cost[v][u] = adjMatrix[v][u];
+                }
             }
-            base = (base * base)%MOD;
-            b>>=1;
         }
-        return res;
+
+        for(int k=1;k<=n;k++){
+            for(int v=1;v<=n;v++){
+                for(int u = 1;u<=n;u++){
+                    if(cost[v][k]!=I && cost[k][u]!=I && (cost[v][k]+cost[k][u] < cost[v][u])){
+                        cost[v][u] = cost[v][k]+cost[k][u];
+                    }
+                }
+                if(cost[v][v]<0){
+                    //negative weight cycle
+                }
+            }
+        }
     }
 
     static class FastScanner {

@@ -23,7 +23,6 @@ public class ExponentiationII {
 //            long res = exponentiation(b,c);
 //            res = exponentiation(a,res);
 //            ans.append(res).append("\n");
-            //TO DO
 
             long b_pow_c = exponentiation(b,c,MOD-1);
             long finalAns = exponentiation(a,b_pow_c,MOD);

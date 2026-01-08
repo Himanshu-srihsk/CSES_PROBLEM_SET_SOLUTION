@@ -1,75 +1,76 @@
-package Mathematics;
+package IntroductoryProblems;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
-public class BinomialCoefficients {
-    static final int MOD = 1_000_000_007;
-    static final int MAX = 1_000_000;
-    static long[] fact = new long[MAX + 1];
-    static long[] invFact = new long[MAX + 1];
+public class CreatingStrings {
     public static void main(String[] args) throws IOException {
-        FastScanner fs = new FastScanner(System.in);
-        precompute();
+       FastScanner fs = new FastScanner(System.in);
+       String str = fs.nextString();
 
-        int q = fs.nextInt();
-        StringBuilder sb = new StringBuilder();
+        if (str.length() == 1) {
+            System.out.println(1);
+            System.out.print(str);
+            return;
+        }
+        char[] chars = str.toCharArray();
+        Arrays.sort(chars);
+        StringBuilder out = new StringBuilder();
+        int cnt = 0;
+        while (true)
+        {
+            cnt++;
+            // print the current permutation
 
-        while (q-- > 0) {
-            int n = fs.nextInt();
-            int k = fs.nextInt();
-            if (k < 0 || k > n) {
-                sb.append(0).append('\n');
-            }else{
-                long ans = fact[n];
-                ans = (ans * invFact[k])%MOD;
-                ans = (ans * invFact[n-k])%MOD;
-                sb.append(ans).append("\n");
+            out.append(new String(chars)).append("\n");
+
+            // find the next lexicographically ordered permutation
+            if (!next_permutation(chars)) {
+                break;
             }
         }
-        System.out.println(sb.toString());
+        System.out.println(cnt);
+        System.out.println(out.toString());
 
     }
-
-    private static void precompute() {
-        fact[0]= 1;
-        for(int i=1;i<=MAX;i++){
-            fact[i]= (fact[i-1]*i)%MOD;
-        }
-
-        /*
-        n! / (k! * (n-k)!)
-        a / b  ≡  a × inverse(b) (mod M)
-        inverse(b) = b^(M-2) mod M
-
-        (i+1)! = (i+1) × i!
-        inverse(i!) = inverse((i+1)!) × (i+1)
-invFact[i] = invFact[i+1] * (i+1) % MOD;
-
-
-         */
-        invFact[MAX] = exponentiation(fact[MAX], MOD-2);
-        for (int i = MAX - 1; i >= 0; i--) {
-            invFact[i] = invFact[i + 1] * (i + 1) % MOD;
-        }
-
-//        for(int i= MAX;i>=0;i--){
-//            invFact[i] = exponentiation(fact[i], MOD-2);
-//        }
-    }
-    private static long exponentiation(long a, long b) {
-        long res = 1;
-        long base = a;
-        while(b>0){
-            if(b%2!=0){
-                res = (res * base)%MOD;
+    public static boolean next_permutation(char[] chars){
+        //// find the largest index `i` such that `chars[i-1]` is less than `chars[i]`
+        int  i= chars.length - 1;
+        while (chars[i-1]>=chars[i]){
+            if(--i==0){
+                return false;
             }
-            base = (base * base)%MOD;
-            b>>=1;
         }
-        return res;
+
+        // find the highest index `j` to the right of index `i` such that
+        // chars[j] > chars[i-1]
+
+        int j = chars.length - 1;
+        while (j>i && chars[j]<=chars[i-1]){
+            j--;
+        }
+        swap(chars, i - 1, j);
+
+        // reverse substring `chars[i…n)` and return true
+        reverse(chars, i);
+
+        return true;
+
+    }
+    private static void swap(char[] chars, int i, int j)
+    {
+        char ch = chars[i];
+        chars[i] = chars[j];
+        chars[j] = ch;
     }
 
+    private static void reverse(char[] chars, int start)
+    {
+        for (int i = start, j = chars.length - 1; i < j; i++, j--) {
+            swap(chars, i, j);
+        }
+    }
     static class FastScanner {
         private final byte[] buffer = new byte[1 << 16];
         private int ptr = 0, len = 0;

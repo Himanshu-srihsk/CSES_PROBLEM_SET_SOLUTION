@@ -1,73 +1,70 @@
-package Mathematics;
+package GraphAlgorithms;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
 
-public class BinomialCoefficients {
-    static final int MOD = 1_000_000_007;
-    static final int MAX = 1_000_000;
-    static long[] fact = new long[MAX + 1];
-    static long[] invFact = new long[MAX + 1];
+public class BuildingTeams {
+    static List<Integer>[] graph;
+    static boolean[] visited;
+    static int[] team;
     public static void main(String[] args) throws IOException {
-        FastScanner fs = new FastScanner(System.in);
-        precompute();
+       FastScanner fs = new FastScanner(System.in);
+        int n = fs.nextInt();
+        int m = fs.nextInt();
+        graph = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) graph[i] = new ArrayList<>();
 
-        int q = fs.nextInt();
-        StringBuilder sb = new StringBuilder();
-
-        while (q-- > 0) {
-            int n = fs.nextInt();
-            int k = fs.nextInt();
-            if (k < 0 || k > n) {
-                sb.append(0).append('\n');
-            }else{
-                long ans = fact[n];
-                ans = (ans * invFact[k])%MOD;
-                ans = (ans * invFact[n-k])%MOD;
-                sb.append(ans).append("\n");
-            }
+        for (int i = 0; i < m; i++) {
+            int u = fs.nextInt();
+            int v = fs.nextInt();
+            graph[u].add(v);
+            graph[v].add(u);
         }
-        System.out.println(sb.toString());
-
-    }
-
-    private static void precompute() {
-        fact[0]= 1;
-        for(int i=1;i<=MAX;i++){
-            fact[i]= (fact[i-1]*i)%MOD;
-        }
-
+        visited = new boolean[n + 1];
+        team = new int[n+1];
         /*
-        n! / (k! * (n-k)!)
-        a / b  ≡  a × inverse(b) (mod M)
-        inverse(b) = b^(M-2) mod M
-
-        (i+1)! = (i+1) × i!
-        inverse(i!) = inverse((i+1)!) × (i+1)
-invFact[i] = invFact[i+1] * (i+1) % MOD;
-
+        check if every componets is Bipartite graph or not. i.e no odd cycle
 
          */
-        invFact[MAX] = exponentiation(fact[MAX], MOD-2);
-        for (int i = MAX - 1; i >= 0; i--) {
-            invFact[i] = invFact[i + 1] * (i + 1) % MOD;
-        }
 
-//        for(int i= MAX;i>=0;i--){
-//            invFact[i] = exponentiation(fact[i], MOD-2);
-//        }
-    }
-    private static long exponentiation(long a, long b) {
-        long res = 1;
-        long base = a;
-        while(b>0){
-            if(b%2!=0){
-                res = (res * base)%MOD;
+        for(int i=1;i<=n;i++){
+            if(!visited[i]){
+                if(!checkIfBipartite(i,n)){
+                    System.out.println("IMPOSSIBLE");
+                    return;
+                }
             }
-            base = (base * base)%MOD;
-            b>>=1;
         }
-        return res;
+        StringBuilder out = new StringBuilder();
+        for(int i=1;i<=n;i++){
+            out.append(team[i]).append(" ");
+        }
+        System.out.println(out.toString());
+
+    }
+
+    private static boolean checkIfBipartite(int i, int n) {
+        Queue<Integer> queue = new ArrayDeque<>();
+        team[i] = 1;
+        visited[i] = true;
+        queue.add(i);
+        while (!queue.isEmpty()){
+            int v = queue.poll();
+            for(int u: graph[v]){
+                if(!visited[u]){
+                    visited[u] = true;
+                    team[u] = team[v]==1?2:1;
+                    queue.add(u);
+                }else if(team[v]==team[u]){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     static class FastScanner {
