@@ -2,71 +2,76 @@ package GraphAlgorithms;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Stack;
+import java.util.HashMap;
+import java.util.Map;
 
-public class CourseSchedule {
-    static List<Integer>[] graph;
-    static int[] indegree;
-    static boolean[] visited;
+public class RoadConstruction {
     public static void main(String[] args) throws IOException {
-      FastScanner fs = new FastScanner(System.in);
-      int n = fs.nextInt();
-      int m = fs.nextInt();
-        graph = new ArrayList[n + 1];
-        indegree = new int[n+1];
-        Arrays.fill(indegree,0);
-        for (int i = 1; i <= n; i++) graph[i] = new ArrayList<>();
-
-        for (int i = 0; i < m; i++) {
-            int u = fs.nextInt();
-            int v = fs.nextInt();
-            graph[u].add(v);
-            indegree[v]++;
+       FastScanner fs = new FastScanner(System.in);
+       int n = fs.nextInt();
+       int m = fs.nextInt();
+       /*
+       Disjoint Set Union
+        */
+        int[] sets = new int[n];
+        for(int i=0;i<n;i++){
+            sets[i] = i+1;
         }
-        visited = new boolean[n + 1];
-        List<Integer> ans =  doTopologicalSort(n);
-        if(ans==null){
-            System.out.println("IMPOSSIBLE");
-            return;
-        }
+        DisJointSet  ds = new DisJointSet(n);
         StringBuilder out = new StringBuilder();
-        for(int x:ans){
-            out.append(x).append(" ");
+        while (m-->0){
+            int a =fs.nextInt();
+            int b = fs.nextInt();
+            ds.union(a,b);
+
+            int numComponent = ds.numComponents;
+            int largestComponent = ds.maxSize;
+            out.append(numComponent).append(" ").append(largestComponent).append("\n");
         }
         System.out.println(out.toString());
+
     }
+    static class DisJointSet{
+        int[] parent;
+        int[] size;
+        int numComponents;
+        int maxSize;
+        public DisJointSet(int n) {
+            parent = new int[n + 1];
+            size = new int[n + 1];
+            numComponents = n;
+            maxSize = 1;
+            for (int i = 1; i <= n; i++) {
+                parent[i] = i;
+                size[i] = 1;
+            }
+        }
 
-    private static List<Integer> doTopologicalSort(int n) {
-        List<Integer> L = new ArrayList<>();
-        Stack<Integer> stack = new Stack<>();
+        public void union(int a, int b) {
+            int x = find(a);
+            int y = find(b);
+            if(x==y){
+                return;
+            }
+            if(size[x]>size[y]){
+                parent[y] = x;
+                size[x]+=size[y];
+            }else if(size[x]<size[y]){
+                parent[x] = y;
+                size[y]+=size[x];
+            }else {
+                parent[x] = y;
+                size[y]+=size[x];
+            }
+            numComponents--;
+            maxSize = Math.max(maxSize,Math.max(size[x],size[y]));
+        }
+        public int find(int k) {
+            if (parent[k] == k) return k;
+            return parent[k] = find(parent[k]); // Path compression
+        }
 
-        for(int i=1;i<=n;i++){
-            if(indegree[i]==0){
-                stack.push(i);
-            }
-        }
-        while (!stack.isEmpty()){
-            int i = stack.pop();
-            L.add(i);
-            for(int m: graph[i]){
-                indegree[m]--;
-                if(indegree[m]==0){
-                    stack.push(m);
-                }
-            }
-        }
-        for (int i = 0; i < n; i++)
-        {
-            if (indegree[i] != 0) {
-                return null;
-            }
-        }
-        return L;
     }
-
     static class FastScanner {
         private final byte[] buffer = new byte[1 << 16];
         private int ptr = 0, len = 0;

@@ -4,68 +4,83 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Stack;
 
-public class CourseSchedule {
+public class RoundTripII {
     static List<Integer>[] graph;
-    static int[] indegree;
     static boolean[] visited;
+    static boolean[] recStack; // to detect if part of same recursive dfs call
+    static int[] parent;
+    static int cycleStart = -1, cycleEnd = -1;
     public static void main(String[] args) throws IOException {
-      FastScanner fs = new FastScanner(System.in);
-      int n = fs.nextInt();
-      int m = fs.nextInt();
+       FastScanner fs = new FastScanner(System.in);
+       int n = fs.nextInt();
+        int m = fs.nextInt();
+        /*
+        finding cycle in Directed graph
+         */
         graph = new ArrayList[n + 1];
-        indegree = new int[n+1];
-        Arrays.fill(indegree,0);
+        parent = new int[n+1];
         for (int i = 1; i <= n; i++) graph[i] = new ArrayList<>();
 
         for (int i = 0; i < m; i++) {
             int u = fs.nextInt();
             int v = fs.nextInt();
             graph[u].add(v);
-            indegree[v]++;
         }
         visited = new boolean[n + 1];
-        List<Integer> ans =  doTopologicalSort(n);
-        if(ans==null){
-            System.out.println("IMPOSSIBLE");
-            return;
-        }
-        StringBuilder out = new StringBuilder();
-        for(int x:ans){
-            out.append(x).append(" ");
-        }
-        System.out.println(out.toString());
-    }
-
-    private static List<Integer> doTopologicalSort(int n) {
-        List<Integer> L = new ArrayList<>();
-        Stack<Integer> stack = new Stack<>();
-
-        for(int i=1;i<=n;i++){
-            if(indegree[i]==0){
-                stack.push(i);
-            }
-        }
-        while (!stack.isEmpty()){
-            int i = stack.pop();
-            L.add(i);
-            for(int m: graph[i]){
-                indegree[m]--;
-                if(indegree[m]==0){
-                    stack.push(m);
+        recStack = new boolean[n+1];
+        boolean cycleExist = false;
+        Arrays.fill(parent, -1);
+        for (int i = 1; i <= n; i++) {
+            if (!visited[i]) {
+                if (dfs(i, -1)) {
+                    cycleExist = true;
+                    break;
                 }
             }
         }
-        for (int i = 0; i < n; i++)
-        {
-            if (indegree[i] != 0) {
-                return null;
+        if(!cycleExist){
+            System.out.println("IMPOSSIBLE");
+            return;
+        }
+        List<Integer> cycle = new ArrayList<>();
+        cycle.add(cycleStart);
+
+        for (int v = cycleEnd; v != cycleStart; v = parent[v]) {
+            cycle.add(v);
+        }
+        cycle.add(cycleStart);
+
+        Collections.reverse(cycle);
+
+        StringBuilder out = new StringBuilder();
+        out.append(cycle.size()).append("\n");
+        for(int node: cycle){
+            out.append(node).append(" ");
+        }
+        System.out.println(out.toString());
+    }
+    private static boolean dfs(int node,int par){
+        visited[node] = true;
+        recStack[node] = true;
+        for(int child: graph[node]){
+            if(!visited[child]){
+                parent[child] = node;
+                if(dfs(child,node)){
+                    return true;
+                }
+            } else if (recStack[child]) {
+                cycleStart = child;
+                cycleEnd = node;
+                return true;
             }
         }
-        return L;
+        recStack[node] = false;
+        return false;
     }
+
 
     static class FastScanner {
         private final byte[] buffer = new byte[1 << 16];

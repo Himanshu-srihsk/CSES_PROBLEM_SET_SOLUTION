@@ -2,71 +2,80 @@ package GraphAlgorithms;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
-public class CourseSchedule {
+public class PlanetsandKingdoms {
     static List<Integer>[] graph;
-    static int[] indegree;
-    static boolean[] visited;
+    static List<Integer>[] graphR;
+    static Stack<Integer> stack = new Stack<>();
     public static void main(String[] args) throws IOException {
-      FastScanner fs = new FastScanner(System.in);
-      int n = fs.nextInt();
-      int m = fs.nextInt();
+       FastScanner fs = new FastScanner(System.in);
+       int n = fs.nextInt();
+        int m = fs.nextInt();
+        /*
+       SCC - Kosaraju Algorithm
+        */
         graph = new ArrayList[n + 1];
-        indegree = new int[n+1];
-        Arrays.fill(indegree,0);
+        graphR = new ArrayList[n+1];
         for (int i = 1; i <= n; i++) graph[i] = new ArrayList<>();
+        for (int i = 1; i <= n; i++) graphR[i] = new ArrayList<>();
 
         for (int i = 0; i < m; i++) {
             int u = fs.nextInt();
             int v = fs.nextInt();
             graph[u].add(v);
-            indegree[v]++;
+            graphR[v].add(u);
         }
-        visited = new boolean[n + 1];
-        List<Integer> ans =  doTopologicalSort(n);
-        if(ans==null){
-            System.out.println("IMPOSSIBLE");
-            return;
+
+        boolean[] visited = new boolean[n+1];
+
+
+        for(int i=0;i<n;i++){
+            if (!visited[i+1]) {
+
+                dfs(graph,i+1,visited);
+            }
         }
+
+        Arrays.fill(visited,false);
+
+        int numSCC = 0;
+        int[] sccAssign = new int[n + 1];
+        while (!stack.isEmpty()){
+            int i = stack.pop();
+            if (!visited[i]) {
+                numSCC++;
+                dfs(graphR,i,visited,numSCC,sccAssign);
+            }
+        }
+
         StringBuilder out = new StringBuilder();
-        for(int x:ans){
-            out.append(x).append(" ");
+        out.append(numSCC).append("\n");
+        for(int i=1;i<=n;i++){
+            out.append(sccAssign[i]).append(" ");
         }
         System.out.println(out.toString());
     }
+    static void dfs(List<Integer> [] graph, int src, boolean[] visited){
+        visited[src] = true;
 
-    private static List<Integer> doTopologicalSort(int n) {
-        List<Integer> L = new ArrayList<>();
-        Stack<Integer> stack = new Stack<>();
-
-        for(int i=1;i<=n;i++){
-            if(indegree[i]==0){
-                stack.push(i);
+        for(int e: graph[src]){
+            if(!visited[e]){
+                dfs(graph,e,visited);
             }
         }
-        while (!stack.isEmpty()){
-            int i = stack.pop();
-            L.add(i);
-            for(int m: graph[i]){
-                indegree[m]--;
-                if(indegree[m]==0){
-                    stack.push(m);
-                }
-            }
-        }
-        for (int i = 0; i < n; i++)
-        {
-            if (indegree[i] != 0) {
-                return null;
-            }
-        }
-        return L;
+        stack.push(src);
     }
 
+    static void dfs(List<Integer> [] graph, int src, boolean[] visited,int id,int[] sccAssign){
+        visited[src] = true;
+        sccAssign[src] = id;
+        for(int e: graph[src]){
+            if(!visited[e]){
+                dfs(graph,e,visited,id,sccAssign);
+            }
+        }
+    }
     static class FastScanner {
         private final byte[] buffer = new byte[1 << 16];
         private int ptr = 0, len = 0;

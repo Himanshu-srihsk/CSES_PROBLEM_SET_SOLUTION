@@ -4,79 +4,83 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-public class FlightDiscount {
+public class FlightRoutes {
     static List<Edge>[] graph;
-    static List<Edge>[] graphR;
-    static int n;
     public static void main(String[] args) throws IOException {
-        FastScanner fs = new FastScanner(System.in);
-        n = fs.nextInt();
+       FastScanner fs = new FastScanner(System.in);
+        int n = fs.nextInt();
         int m = fs.nextInt();
+        int k = fs.nextInt();
         graph = new ArrayList[n+1];
-        graphR = new ArrayList[n+1];
-        List<Edge> edges = new ArrayList<>();
         for (int i = 1; i <= n; i++) graph[i] = new ArrayList<>();
-        for (int i = 1; i <= n; i++) graphR[i] = new ArrayList<>();
         for(int i=0;i<m;i++){
             int u = fs.nextInt();
             int v = fs.nextInt();
-            long d = fs.nextLong();
-            edges.add(new Edge(u,v,d));
+            long d = fs.nextInt();
             graph[u].add(new Edge(u,v,d));
-            graphR[v].add(new Edge(v,u,d));
         }
-        long[] dist = new long[n+1];
-        Arrays.fill(dist,Long.MAX_VALUE);
-
-        findShortestPaths(1,n,dist,graph);
-
-        long[] distR = new long[n+1];
-        Arrays.fill(distR,Long.MAX_VALUE);
-
-        findShortestPaths(n,1,distR,graphR);
-        long ans = Long.MAX_VALUE;
-        for(Edge e: edges){
-            int a = e.source;
-            int b = e.dest;
-            long c = e.weight;
-
-            if (dist[a] != Long.MAX_VALUE && distR[b] != Long.MAX_VALUE) {
-                long currentPathWithDiscount = dist[a] + distR[b] + (c / 2);
-                ans = Math.min(ans, currentPathWithDiscount);
-            }
-        }
-        System.out.println(ans);
-
+        findShortestPaths(1,n,k);
     }
-    private static void findShortestPaths(int src, int dest,long[] dist,List<Edge>[] graph) {
+    private static void findShortestPaths(int src, int n,int  k) {
+//        long[] dist = new long[n+1];
+//        Arrays.fill(dist,Long.MAX_VALUE);
+//        dist[src] = 0l;
 
-        dist[src] = 0l;
+        PriorityQueue<Long>[] bestDistances = new PriorityQueue[n+1];
+        for (int i = 1; i <= n; i++) {
+            bestDistances[i] = new PriorityQueue<>(Comparator.reverseOrder());
+        }
 
         PriorityQueue<Node> minHeap = new PriorityQueue<>(Comparator.comparingLong(node -> node.weight));
-        minHeap.add(new Node(src,dist[src]));
+        minHeap.add(new Node(src,0));
+        bestDistances[src].add(0L);
 
-        boolean[] done = new boolean[n+1];
 
         while (!minHeap.isEmpty()){
             Node node = minHeap.poll();
             int u = node.vertex;
+            long w = node.weight;
 
-
-            if (done[u]) continue;
-            done[u] = true;
+            if(w > bestDistances[u].peek() && bestDistances[u].size()==k){
+                continue;
+            }
 
             for(Edge e: graph[u]){
                 int v = e.dest;
-                long w = e.weight;
-                if(!done[v] && dist[u]+w < dist[v]){
-                    dist[v] = dist[u]+w;
-                    minHeap.add(new Node(v,dist[v]));
+                long newW = w + e.weight;
+
+                if(bestDistances[v].size() < k){
+                    bestDistances[v].add(newW);
+                    minHeap.add(new Node(v,newW));
+                }
+                else if(bestDistances[v].peek()> newW){
+                    bestDistances[v].poll();
+                    bestDistances[v].add(newW);
+                    minHeap.add(new Node(v,newW));
                 }
             }
 
 
         }
+        List<Long> ans = new ArrayList<>(bestDistances[n]);
+        Collections.sort(ans);
+        StringBuilder out = new StringBuilder();
+        for(int i=0;i<ans.size();i++){
+            out.append(ans.get(i)).append(" ");
+        }
+        System.out.println(out.toString());
 
+    }
+    static class Node
+    {
+        int vertex;
+        long weight;
+
+        public Node(int vertex, long weight)
+        {
+            this.vertex = vertex;
+            this.weight = weight;
+        }
     }
     static class Edge
     {
@@ -87,17 +91,6 @@ public class FlightDiscount {
         {
             this.source = source;
             this.dest = dest;
-            this.weight = weight;
-        }
-    }
-    static class Node
-    {
-        int vertex;
-        long weight;
-
-        public Node(int vertex, long weight)
-        {
-            this.vertex = vertex;
             this.weight = weight;
         }
     }

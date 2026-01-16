@@ -1,56 +1,35 @@
-package GraphAlgorithms;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-public class FlightDiscount {
+public class Investigation {
     static List<Edge>[] graph;
-    static List<Edge>[] graphR;
-    static int n;
+    static final int MOD = 1000000007;
     public static void main(String[] args) throws IOException {
         FastScanner fs = new FastScanner(System.in);
-        n = fs.nextInt();
+        int n = fs.nextInt();
         int m = fs.nextInt();
         graph = new ArrayList[n+1];
-        graphR = new ArrayList[n+1];
-        List<Edge> edges = new ArrayList<>();
         for (int i = 1; i <= n; i++) graph[i] = new ArrayList<>();
-        for (int i = 1; i <= n; i++) graphR[i] = new ArrayList<>();
         for(int i=0;i<m;i++){
             int u = fs.nextInt();
             int v = fs.nextInt();
-            long d = fs.nextLong();
-            edges.add(new Edge(u,v,d));
+            long d = fs.nextInt();
             graph[u].add(new Edge(u,v,d));
-            graphR[v].add(new Edge(v,u,d));
         }
+        findShortestPaths(1,n);
+    }
+    private static void findShortestPaths(int src, int n) {
         long[] dist = new long[n+1];
         Arrays.fill(dist,Long.MAX_VALUE);
-
-        findShortestPaths(1,n,dist,graph);
-
-        long[] distR = new long[n+1];
-        Arrays.fill(distR,Long.MAX_VALUE);
-
-        findShortestPaths(n,1,distR,graphR);
-        long ans = Long.MAX_VALUE;
-        for(Edge e: edges){
-            int a = e.source;
-            int b = e.dest;
-            long c = e.weight;
-
-            if (dist[a] != Long.MAX_VALUE && distR[b] != Long.MAX_VALUE) {
-                long currentPathWithDiscount = dist[a] + distR[b] + (c / 2);
-                ans = Math.min(ans, currentPathWithDiscount);
-            }
-        }
-        System.out.println(ans);
-
-    }
-    private static void findShortestPaths(int src, int dest,long[] dist,List<Edge>[] graph) {
-
         dist[src] = 0l;
+
+        long[] ways = new long[n+1];
+        ways[src] = 1;
+
+        long[] miniF = new long[n+1];
+        long[] maxiF = new long[n+1];
+
 
         PriorityQueue<Node> minHeap = new PriorityQueue<>(Comparator.comparingLong(node -> node.weight));
         minHeap.add(new Node(src,dist[src]));
@@ -70,13 +49,36 @@ public class FlightDiscount {
                 long w = e.weight;
                 if(!done[v] && dist[u]+w < dist[v]){
                     dist[v] = dist[u]+w;
+                    ways[v] = ways[u];
+                    miniF[v] = miniF[u]+1;
+                    maxiF[v] = maxiF[u]+1;
                     minHeap.add(new Node(v,dist[v]));
+                }
+                else if(!done[v] && dist[u]+w == dist[v]){
+                    ways[v]=(ways[v] +ways[u])%MOD;
+                    miniF[v] = Math.min(miniF[u]+1,miniF[v]);
+                    maxiF[v] = Math.max(maxiF[v],maxiF[u]+1);
                 }
             }
 
 
         }
 
+        StringBuilder out = new StringBuilder();
+        out.append(dist[n]).append(" ").append(ways[n]).append(" ").append(miniF[n]).append(" ").append(maxiF[n]);
+        System.out.println(out.toString());
+
+    }
+    static class Node
+    {
+        int vertex;
+        long weight;
+
+        public Node(int vertex, long weight)
+        {
+            this.vertex = vertex;
+            this.weight = weight;
+        }
     }
     static class Edge
     {
@@ -87,17 +89,6 @@ public class FlightDiscount {
         {
             this.source = source;
             this.dest = dest;
-            this.weight = weight;
-        }
-    }
-    static class Node
-    {
-        int vertex;
-        long weight;
-
-        public Node(int vertex, long weight)
-        {
-            this.vertex = vertex;
             this.weight = weight;
         }
     }

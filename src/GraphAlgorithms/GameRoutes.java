@@ -3,21 +3,21 @@ package GraphAlgorithms;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
-public class CourseSchedule {
+public class GameRoutes {
     static List<Integer>[] graph;
-    static int[] indegree;
     static boolean[] visited;
+    static long [] dp;
+    static int[] indegree;
+    static int MOD = 1000000007;
     public static void main(String[] args) throws IOException {
-      FastScanner fs = new FastScanner(System.in);
-      int n = fs.nextInt();
-      int m = fs.nextInt();
+        FastScanner fs = new FastScanner(System.in);
+        int n = fs.nextInt();
+        int m = fs.nextInt();
         graph = new ArrayList[n + 1];
         indegree = new int[n+1];
-        Arrays.fill(indegree,0);
         for (int i = 1; i <= n; i++) graph[i] = new ArrayList<>();
 
         for (int i = 0; i < m; i++) {
@@ -26,19 +26,20 @@ public class CourseSchedule {
             graph[u].add(v);
             indegree[v]++;
         }
+        List<Integer> topologicalOrder =  doTopologicalSort(n);
         visited = new boolean[n + 1];
-        List<Integer> ans =  doTopologicalSort(n);
-        if(ans==null){
-            System.out.println("IMPOSSIBLE");
-            return;
-        }
-        StringBuilder out = new StringBuilder();
-        for(int x:ans){
-            out.append(x).append(" ");
-        }
-        System.out.println(out.toString());
-    }
+        dp = new long[n+1];
+        dp[1] = 1;
 
+        for(int u: topologicalOrder){
+            for(int v:graph[u]){
+                dp[v] = (dp[v]+ dp[u]) % MOD;
+            }
+        }
+        System.out.println(dp[n]);
+
+
+    }
     private static List<Integer> doTopologicalSort(int n) {
         List<Integer> L = new ArrayList<>();
         Stack<Integer> stack = new Stack<>();
@@ -66,7 +67,6 @@ public class CourseSchedule {
         }
         return L;
     }
-
     static class FastScanner {
         private final byte[] buffer = new byte[1 << 16];
         private int ptr = 0, len = 0;

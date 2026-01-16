@@ -2,103 +2,73 @@ package GraphAlgorithms;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public class FlightDiscount {
+public class FlightRoutesCheck {
     static List<Edge>[] graph;
     static List<Edge>[] graphR;
-    static int n;
     public static void main(String[] args) throws IOException {
-        FastScanner fs = new FastScanner(System.in);
-        n = fs.nextInt();
-        int m = fs.nextInt();
+       FastScanner fs = new FastScanner(System.in);
+       int n = fs.nextInt();
+       int m = fs.nextInt();
+       /*
+       SCC - Kosaraju Algorithm
+        */
         graph = new ArrayList[n+1];
         graphR = new ArrayList[n+1];
-        List<Edge> edges = new ArrayList<>();
         for (int i = 1; i <= n; i++) graph[i] = new ArrayList<>();
         for (int i = 1; i <= n; i++) graphR[i] = new ArrayList<>();
-        for(int i=0;i<m;i++){
+        while (m-- >0){
             int u = fs.nextInt();
             int v = fs.nextInt();
-            long d = fs.nextLong();
-            edges.add(new Edge(u,v,d));
-            graph[u].add(new Edge(u,v,d));
-            graphR[v].add(new Edge(v,u,d));
+            graph[u].add(new Edge(u,v));
+            graphR[v].add(new Edge(v,u));
         }
-        long[] dist = new long[n+1];
-        Arrays.fill(dist,Long.MAX_VALUE);
+        boolean[] visited = new boolean[n+1];
 
-        findShortestPaths(1,n,dist,graph);
-
-        long[] distR = new long[n+1];
-        Arrays.fill(distR,Long.MAX_VALUE);
-
-        findShortestPaths(n,1,distR,graphR);
-        long ans = Long.MAX_VALUE;
-        for(Edge e: edges){
-            int a = e.source;
-            int b = e.dest;
-            long c = e.weight;
-
-            if (dist[a] != Long.MAX_VALUE && distR[b] != Long.MAX_VALUE) {
-                long currentPathWithDiscount = dist[a] + distR[b] + (c / 2);
-                ans = Math.min(ans, currentPathWithDiscount);
+        dfs(graph,1,visited);
+        for (int i=1;i<=n;i++)
+        {
+            if (!visited[i]) {
+                System.out.println("NO");
+                System.out.println(1+" "+i);
+                return;
             }
         }
-        System.out.println(ans);
+
+        Arrays.fill(visited,false);
+        dfs(graphR,1,visited);
+        for (int i=1;i<=n;i++)
+        {
+            if (!visited[i]) {
+                System.out.println("NO");
+                System.out.println(i+" "+1);
+                return;
+            }
+        }
+        System.out.println("YES");
 
     }
-    private static void findShortestPaths(int src, int dest,long[] dist,List<Edge>[] graph) {
-
-        dist[src] = 0l;
-
-        PriorityQueue<Node> minHeap = new PriorityQueue<>(Comparator.comparingLong(node -> node.weight));
-        minHeap.add(new Node(src,dist[src]));
-
-        boolean[] done = new boolean[n+1];
-
-        while (!minHeap.isEmpty()){
-            Node node = minHeap.poll();
-            int u = node.vertex;
-
-
-            if (done[u]) continue;
-            done[u] = true;
-
-            for(Edge e: graph[u]){
-                int v = e.dest;
-                long w = e.weight;
-                if(!done[v] && dist[u]+w < dist[v]){
-                    dist[v] = dist[u]+w;
-                    minHeap.add(new Node(v,dist[v]));
-                }
+    static void dfs(List<Edge> [] graph, int src, boolean[] visited){
+        visited[src] = true;
+        for(Edge e: graph[src]){
+            if(!visited[e.dest]){
+                dfs(graph,e.dest,visited);
             }
-
-
         }
-
     }
     static class Edge
     {
         int source, dest;
-        long weight;
 
-        public Edge(int source, int dest, long weight)
+
+        public Edge(int source, int dest)
         {
             this.source = source;
             this.dest = dest;
-            this.weight = weight;
-        }
-    }
-    static class Node
-    {
-        int vertex;
-        long weight;
 
-        public Node(int vertex, long weight)
-        {
-            this.vertex = vertex;
-            this.weight = weight;
         }
     }
     static class FastScanner {
