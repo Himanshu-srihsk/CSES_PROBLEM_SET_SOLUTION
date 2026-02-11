@@ -1,54 +1,14 @@
-package DynamicProgramming;
+package AdvancedTechniques;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 
-public class CoinCombinationsI {
-    static final int MOD = 1000000007;
+public class MeetintheMiddle {
     public static void main(String[] args) throws IOException {
-      FastScanner fs = new FastScanner(System.in);
+        FastScanner fs = new FastScanner(System.in);
         int n = fs.nextInt();
         int x = fs.nextInt();
         int[] coins = new int[n];
-
-        /*
-        Coin Combinations I (Order Matters)
-        for sum = 1 -> X
-            for each coin
-
-
-         har sum pe soch rahe ho:
-
-        "Last coin kya ho sakta hai?"
-
-        Example sum = 5
-
-        Agar last coin = 2 -> pehle sum 3 banana hoga
-
-        Agar last coin = 3 -> pehle sum 2 banana hoga
-
-        Dono alag paths → dono count honge
-
-        Isliye 2 + 3 and 3 + 2 dono count hote hain.
-         */
-
-        for(int i=0;i<n;i++){
-            coins[i] = fs.nextInt();
-        }
-        Arrays.sort(coins);
-
-        int[] dp = new int[x+1];
-        dp[0] = 1;
-        for(int i=1;i<=x;i++){
-            for(int j=0;j<n;j++){
-                if(i>=coins[j]){
-                    dp[i] = (dp[i-coins[j]]+ dp[i])%MOD;
-                }
-            }
-        }
-        System.out.println(dp[x]);
-
     }
     static class FastScanner {
         private final byte[] buffer = new byte[1 << 16];

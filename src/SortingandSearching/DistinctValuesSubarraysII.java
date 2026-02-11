@@ -1,53 +1,36 @@
-package DynamicProgramming;
+package SortingandSearching;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
-public class CoinCombinationsI {
-    static final int MOD = 1000000007;
+public class DistinctValuesSubarraysII {
     public static void main(String[] args) throws IOException {
-      FastScanner fs = new FastScanner(System.in);
-        int n = fs.nextInt();
-        int x = fs.nextInt();
-        int[] coins = new int[n];
+       FastScanner fs = new FastScanner(System.in);
+       int n = fs.nextInt();
+       int k = fs.nextInt();
 
-        /*
-        Coin Combinations I (Order Matters)
-        for sum = 1 -> X
-            for each coin
-
-
-         har sum pe soch rahe ho:
-
-        "Last coin kya ho sakta hai?"
-
-        Example sum = 5
-
-        Agar last coin = 2 -> pehle sum 3 banana hoga
-
-        Agar last coin = 3 -> pehle sum 2 banana hoga
-
-        Dono alag paths → dono count honge
-
-        Isliye 2 + 3 and 3 + 2 dono count hote hain.
-         */
-
+        int[] arr = new int[n];
         for(int i=0;i<n;i++){
-            coins[i] = fs.nextInt();
+            arr[i] = fs.nextInt();
         }
-        Arrays.sort(coins);
 
-        int[] dp = new int[x+1];
-        dp[0] = 1;
-        for(int i=1;i<=x;i++){
-            for(int j=0;j<n;j++){
-                if(i>=coins[j]){
-                    dp[i] = (dp[i-coins[j]]+ dp[i])%MOD;
-                }
-            }
-        }
-        System.out.println(dp[x]);
+       int l= 0;
+        Map<Integer, Integer> freq = new HashMap<>();
+        long ans = 0;
+       for(int r=0;r<n;r++){
+           freq.put(arr[r], freq.getOrDefault(arr[r], 0) + 1);
+           while (freq.size()>k){
+               freq.put(arr[l],freq.get(arr[l])-1);
+               if(freq.get(arr[l])==0){
+                   freq.remove(arr[l]);
+               }
+               l++;
+           }
+           ans = ans+(r-l+1);
+       }
+       System.out.println(ans);
 
     }
     static class FastScanner {

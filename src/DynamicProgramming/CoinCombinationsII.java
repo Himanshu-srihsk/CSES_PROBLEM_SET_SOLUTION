@@ -12,6 +12,23 @@ public class CoinCombinationsII {
         int x = fs.nextInt();
         int[] coins = new int[n];
 
+        /*
+        Coin Combinations II (Order Doesn't Matter)
+        for each coin
+            for sum = coin -> X
+
+
+         pehle decide karte ho:
+
+        "Main coin 2 se kya-kya sums bana sakta hoon"
+
+        Phir next coin pe jaate ho:
+
+        "Ab coin 3 add kar sakta hoon, par 3 ke baad wapas 2 use nahi karunga"
+
+        Isliye hmm same cheez ko reverse order me dobara nahi bana paate
+         */
+
         for(int i=0;i<n;i++){
             coins[i] = fs.nextInt();
         }
