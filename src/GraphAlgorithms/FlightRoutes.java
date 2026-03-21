@@ -7,6 +7,7 @@ import java.util.*;
 public class FlightRoutes {
     static List<Edge>[] graph;
     public static void main(String[] args) throws IOException {
+        //Variation of dijkstra
        FastScanner fs = new FastScanner(System.in);
         int n = fs.nextInt();
         int m = fs.nextInt();

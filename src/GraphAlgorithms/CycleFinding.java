@@ -33,11 +33,151 @@ public class CycleFinding {
          */
         bellmanFord(n);
     }
+
+
     static void bellmanFord(int n){
         long[] dist = new long[n+1];
 
+        /*
+        Hmm Bellman-Ford ka standard version use kar sakte ho, lekin CSES Cycle Finding problem me ek subtle difference hai.
+        Arrays.fill(distance, Integer.MAX_VALUE);
+        distance[source] = 0;
+        Then run:
+        V-1 relaxations
+        Then check
+        V-th relaxation → negative cycle
+        This is the classic Bellman-Ford for shortest path from a source.
+        Important property:
+        It detects negative cycles reachable from the source node only.
+
+        Note:
+
+        CSES Cycle Finding problem kya demand karta hai
+        CSES problem asks:
+        Find ANY negative cycle in the graph.
+        Not necessarily reachable from node 1.
+        Graph may look like:
+
+        1 -> 2 -> 3
+
+        4 -> 5 -> 6 -> 4   (negative cycle)
+
+        Source = 1
+
+        Cycle exists but:
+
+        1 cannot reach 4
+
+        Your second algorithm will NOT detect this cycle.
+
+        Because:
+
+        dist[4] = INF
+        dist[5] = INF
+        dist[6] = INF
+
+        Relaxation condition fails:
+
+        distance[u] != INF
+
+        So cycle never gets explored.
+         */
 //        Arrays.fill(dist,Long.MAX_VALUE);
 //        dist[1] = 0;
+
+
+        /*
+
+        code uses:
+
+        Arrays.fill(dist,0);
+
+        Meaning:
+
+        All nodes treated as source
+
+        Equivalent to adding a super source connected to every node with weight 0.
+
+        Graph becomes:
+
+        S -> 1
+        S -> 2
+        S -> 3
+        S -> 4
+        S -> 5
+        S -> 6
+
+        Now every node is reachable.
+
+        So Bellman-Ford will detect any negative cycle in the graph.
+
+        Visual Example
+
+            Graph:
+
+            1 -> 2
+
+            3 -> 4 -> 5 -> 3 (negative cycle)
+            Your second code
+            dist[1] = 0
+            dist[others] = INF
+
+            Nodes 3,4,5 never relaxed.
+
+            Result:
+
+            NO cycle
+
+            Wrong.
+
+           Now using first code
+            dist[i] = 0 i.e. Arrays.fill(dist, 0);
+
+            Now relaxation happens inside cycle:
+
+            3 -> 4
+            4 -> 5
+            5 -> 3
+
+            Costs keep decreasing.
+
+            Bellman-Ford detects cycle.
+
+           Correct.
+
+         */
+
+        /*
+        intution:
+
+        CSES Cycle Finding
+
+        Goal:
+
+        detect negative cycle anywhere
+
+        So question banta hai:
+
+        Bellman-Ford cycle kab detect karta hai?
+
+        Answer:
+
+        jab source se reachable ho
+
+        Phir next thought:
+
+        agar cycle reachable hi na ho source se?
+
+        Solution idea:
+
+        sab nodes ko source bana do
+
+        Which leads to:
+
+        dist[i] = 0
+
+        Ye hi intuition.
+         */
        Arrays.fill(dist, 0);
         int[] parent = new int[n + 1];
         Arrays.fill(parent, -1);
@@ -64,6 +204,42 @@ public class CycleFinding {
         out.append("YES").append("\n");
         /*
         Traverse n step back to get proper node that is actually part iof negative cycle
+
+        Bellman-Ford property:
+
+        V vertices → shortest path without cycle ≤ V-1 edges
+
+        Iska matlab:
+
+        Agar V-th iteration me bhi relaxation ho raha hai
+        → koi negative cycle exist karta hai
+
+        But important baat:
+
+        Relaxation node may be:
+         1)inside the cycle
+         2)after the cycle
+
+        Example:
+
+        1 → 2 → 3 → 4 → 5
+
+
+              cycle 3-4 above
+
+        Cycle:
+
+        3 → 4 → 3
+
+        But node 5 relax ho sakta hai.
+
+        So Bellman-Ford detect karega:
+
+        node = 5
+
+        But cycle actually hai:
+
+        3 → 4 → 3
          */
         for(int i=1;i<=n;i++){
             negativeCycleNode = parent[negativeCycleNode];

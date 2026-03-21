@@ -38,6 +38,24 @@ public class MaximumXorSubarray {
         }
         return ans;
     }
+    /*
+    findMax(root, px)
+    Ye basically dhund raha hai:
+    best previous prefix XOR
+    Matlab koi:
+    px[j]
+    where
+    j < i
+
+    Jo value milti hai
+    XOR calculate hota hai:
+    px[i] ^ px[j]
+    But formula se:
+    px[i] ^ px[j]
+    = XOR(j+1 .. i)
+    Yani:
+    subarray from j+1 to i
+     */
     public static int findMax(Trie root, int num){
         int maxi = 0;
         Trie curr = root;

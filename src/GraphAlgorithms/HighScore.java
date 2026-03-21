@@ -104,6 +104,25 @@ public class HighScore {
 
                 BUT cycle se n (4) reachable nahi
 
+                Cycle:
+
+                2 <-> 3
+                But destination:
+                4
+                Cycle se 4 tak ja hi nahi sakte.
+                So best path:
+                1 → 4
+                finite answer.
+
+                What Bellman-Ford will think
+
+                    Bellman-Ford dekhega:
+                    2  <-> 3 negative cycle
+                    and bolega:
+                    infinite
+                    which is wrong for this problem.
+
+                But,
                 So 1 to 4 maximum score finite (just path 1->4)
                 output NOT -1
 

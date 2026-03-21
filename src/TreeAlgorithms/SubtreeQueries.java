@@ -1,3 +1,4 @@
+package TreeAlgorithms;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +14,7 @@ public class SubtreeQueries {
     static int timer;
     public static void main(String[] args) throws IOException {
         FastScanner fs = new FastScanner(System.in);
-
+//https://www.youtube.com/watch?v=wo--reAZJZU
         n = fs.nextInt();
         q = fs.nextInt();
 

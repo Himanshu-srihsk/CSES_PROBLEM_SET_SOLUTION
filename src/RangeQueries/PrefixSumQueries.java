@@ -1,4 +1,4 @@
-
+package RangeQueries;
 
 import java.io.IOException;
 import java.io.InputStream;

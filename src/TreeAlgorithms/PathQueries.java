@@ -69,6 +69,9 @@ public class PathQueries {
                 int u = fs.nextInt();
                 int entryTime = tin[1]; // entry time of Root
                 int exitTime = tout[u];
+                /*
+                All nodes whose Entry and exits times contain these range {entryTime,exitTime} for node whill contribute prefix sum else it will not;
+                 */
                 long res = fenwickTree.sum(exitTime-1);
                 ans.append(res).append("\n");
             }

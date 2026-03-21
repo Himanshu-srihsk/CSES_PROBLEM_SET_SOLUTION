@@ -25,6 +25,73 @@ public class CountingBits {
         Long ans;
         if((n&1)!=0){
             // n= odd
+            /*
+            n = 5
+            ans = 2 * calculate(2) + 2 + 1
+            n/2 = 2
+            0 1 2 3 4 5
+            Split :
+
+                   0..2
+                    3..5
+              First half
+                    0 1 2
+
+                    Binary:
+
+                    0 -> 0
+                    1 -> 1
+                    2 -> 10
+
+                    Total bits:
+
+                    calculate(2) = 2
+
+                    Second half observation:
+                3 4 5
+
+                Binary:
+
+                3 -> 011
+                4 -> 100
+                5 -> 101
+
+
+                Second half numbers :
+
+                3 = 1 + 2
+                4 = 2 + 2
+                5 = 3 + 2
+
+                Matlab:
+
+                3..5 = (0..2) + extra leading bit
+
+                So bits:
+
+                bits(3..5) = bits(0..2) + extra bits
+
+                bits(0..2)
+                +
+                bits(3..5)
+
+
+                            2
+                            +
+                            (2 + 3)
+
+                            Result:
+
+                            7
+
+                          ->   Formula ban gaya
+F(n) = F(n/2) + (F(n/2) + numbers_in_second_half)
+
+Simplify:
+
+F(n) = 2 * F(n/2) + numbers_in_second_half
+
+             */
             ans = 2* calculate(n/2) + n/2 +1;
         }else{
             ans = calculate(n/2-1)+calculate(n/2)+n/2;

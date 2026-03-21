@@ -91,6 +91,7 @@ public class SOSBitProblem {
            cnt[arr[i]]++;
         }
         // dpSub[mask] = sum of cnt[submask]
+        //dpSub[mask] = count of numbers whose value is submask of mask
         int[] dpSub = cnt.clone();
         for(int i=0;i<MAXB;i++){
            for(int mask = 0;mask<MAX;mask++){
@@ -128,10 +129,27 @@ public class SOSBitProblem {
 
                     /*
                     int complement = ((MAX - 1) ^ x);
-            int bad = dpSub[complement];      // x & y = 0
+            int bad = dpSub[complement];      // x & y = 0 // i.e all y that are submask of ~x
             int ans3 = n - bad;               // x & y != 0
 
                      */
+            /*
+            why dpSub[complement] = bad
+            dpSub is doing exactly:
+
+            count numbers y
+            such that y is a subset of  mask
+
+            We pass:
+            mask = ~x
+            So we get:
+            count numbers y
+            such that y is a subset of  ~x
+            Which means:
+
+            x & y = 0
+            i.e when we do x & {any sibset of mask ~x} that will always be 0
+             */
             out.append(submaskCnt).append(" ")
                     .append(supermaskCnt).append(" ")
                     .append(ans3).append("\n");

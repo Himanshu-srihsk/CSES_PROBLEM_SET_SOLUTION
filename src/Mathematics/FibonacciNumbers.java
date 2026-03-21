@@ -1,66 +1,97 @@
-package GraphAlgorithms;
+package Mathematics;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-public class PlanetsQueriesI {
-    static int ancestor[][];
-    static List<Integer>[] graph;
-    static int n;
-    static final int LOG = 30;
-    /*
-    Binary Lifting graph
-     */
+public class FibonacciNumbers {
+    static final long MOD = 1000000007;
     public static void main(String[] args) throws IOException {
        FastScanner fs = new FastScanner(System.in);
-       n = fs.nextInt();
-       int q = fs.nextInt();
-        ancestor = new int[n+1][LOG+1]; // 2power of 20 is approx 200001
+        long n = fs.nextLong();
+       //https://www.youtube.com/watch?v=EEb6JP3NXBI
+/*
+Matrix exponentiation
 
-        graph = new ArrayList[n + 1];
-        for (int i = 1; i <= n; i++) graph[i] = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            int u = i+1;
-            int v = fs.nextInt();
-            graph[u].add(v);
-            ancestor[u][0] = v;
-        }
+f(n) = f(n-1) + f(n-2)
+     = [1 1] [f(n-1) ]
+             [ f(n-2)]
 
-        preprocess();
-        StringBuilder sb = new StringBuilder();
-        while (q-- > 0) {
-            int x = fs.nextInt();
-            int k = fs.nextInt();
-            int ans = jump(x, k);
-            sb.append(ans).append('\n');
+          i.e 1*2 Mat  and 2*1 matrix
+          above cannot be optimised as it wuill still be o(n) operations as lots of inners matrix multiplication h
+          as to be done as outer num of roes and col is difft but bewlo can be used dto optimise in o(logn)
+
+          now
+          [f(n) ]     = [1 1] [f(n-1)]
+           [ f(n-1)]    [1 0] [f(n-2)]
+
+
+           [f(2) ]     = [1 1] [f(1)]
+           [ f(1)]       [1 0] [f(0)]
+
+           [f(3) ]     = [1 1] [f(2)]
+           [ f(2)]       [1 0] [f(1)]
+
+            [f(3) ]     = [1 1] [1 1] [f(1)]
+           [ f(2)]       [1 0]  [1 0] [f(0)]
+
+                              n-1
+           [f(n) ]     = [1 1] [f(1)]
+           [ f(n-1)]    [1 0] [f(0)]
+
+ */
+        if(n == 0){
+            System.out.println(0);
+            return;
         }
-        System.out.println(sb.toString());
+        long[][] base = {
+                {1,1},
+                {1,0}
+        };
+
+        long[][] res = matrixPower(base, n-1);
+
+        System.out.println(res[0][0]);
+
+
+
+
 
     }
 
-    private static int jump(int x, int k) {
-        for(int i=LOG;i>=0;i--){
-            if(((k>>i)&1)!=0){
-                x = ancestor[x][i];
+    private static long[][] matrixPower(long[][] a, long n) {
+        long[][] result = {
+                {1,0},
+                {0,1}
+        };
+        while(n > 0){
+
+            if((n & 1) == 1){
+                result = multiply(result, a);
             }
+
+            a = multiply(a, a);
+            n >>= 1;
         }
-        return x;
+
+        return result;
+
     }
 
-    private static void preprocess() {
-        for(int i=1;i<=LOG;i++){
-            for(int j=1;j<=n;j++){
-                if(ancestor[j][i-1]!=-1){
-                    ancestor[j][i] = ancestor[ancestor[j][i-1]][i-1];  // i.e 2^k == 2^k-1 * 2^k-1 = 2*2^k-1 = 2^k
+    private static long[][] multiply(long[][] a, long[][] b) {
+        long[][] res = new long[2][2];
+
+        for(int i=0;i<2;i++){
+            for(int j=0;j<2;j++){
+                for(int k=0;k<2;k++){
+                    res[i][j] =
+                            (res[i][j] + a[i][k] * b[k][j]) % MOD;
                 }
             }
         }
 
-
+        return res;
     }
+
     static class FastScanner {
         private final byte[] buffer = new byte[1 << 16];
         private int ptr = 0, len = 0;
